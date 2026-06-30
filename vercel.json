@@ -1,0 +1,6 @@
+{
+  "buildCommand": "vite build",
+  "devCommand": "vite --port $PORT",
+  "installCommand": "bun install",
+  "outputDirectory": "dist"
+}
