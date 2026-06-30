@@ -1,0 +1,1 @@
+ALTER VIEW public.professional_video_eligibility SET (security_invoker = true);

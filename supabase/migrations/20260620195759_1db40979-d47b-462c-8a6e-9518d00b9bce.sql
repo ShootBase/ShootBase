@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.pro_lead_visibility_debug();

@@ -1,0 +1,4 @@
+ALTER TABLE public.jobs REPLICA IDENTITY FULL;
+ALTER TABLE public.quote_requests REPLICA IDENTITY FULL;
+ALTER TABLE public.professionals REPLICA IDENTITY FULL;
+ALTER TABLE public.pro_contact_requests REPLICA IDENTITY FULL;

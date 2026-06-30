@@ -1,0 +1,2 @@
+ALTER TABLE public.support_requests ADD COLUMN IF NOT EXISTS subject TEXT;
+UPDATE public.platform_settings SET value = '"support@shootbase.co.uk"'::jsonb WHERE key = 'support_email' AND (value::text IN ('"info@shootbase.co.uk"', '"support@support.shootbase.co.uk"'));

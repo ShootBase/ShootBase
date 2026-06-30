@@ -1,0 +1,1 @@
+REVOKE SELECT (contact_name, postcode) ON public.professionals FROM anon, authenticated;

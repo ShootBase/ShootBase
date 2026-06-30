@@ -1,0 +1,1 @@
+ALTER TABLE public.admin_notes ALTER COLUMN author_user_id DROP NOT NULL;

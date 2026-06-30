@@ -1,0 +1,1 @@
+ALTER TABLE public.staff_invites ADD COLUMN IF NOT EXISTS country TEXT;

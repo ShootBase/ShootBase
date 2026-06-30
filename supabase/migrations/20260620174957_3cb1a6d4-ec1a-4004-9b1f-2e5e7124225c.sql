@@ -1,0 +1,1 @@
+GRANT SELECT (user_id) ON public.professionals TO authenticated;

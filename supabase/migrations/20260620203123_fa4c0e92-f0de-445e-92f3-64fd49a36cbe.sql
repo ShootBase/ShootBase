@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS sound_new_message boolean NOT NULL DEFAULT true;

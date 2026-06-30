@@ -1,0 +1,376 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/* Display: Cormorant Garamond — only weights/styles actually used above the fold */
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/700.css";
+@import "@fontsource/cormorant-garamond/400-italic.css";
+
+/* Body: Karla — trimmed to weights in active use */
+@import "@fontsource/karla/400.css";
+@import "@fontsource/karla/500.css";
+@import "@fontsource/karla/600.css";
+
+/* Mono retained for tags / chips */
+@import "@fontsource/jetbrains-mono/400.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Studio Noir base palette */
+  --color-paper: #FBF8F3;        /* warm cream, slightly off-white */
+  --color-ink: #0F0F12;           /* near-black, charcoal */
+  --color-ink-soft: #1E1E24;      /* layered surface */
+  --color-gold: #C5A059;          /* legacy gold (kept for backwards compat) */
+  --color-champagne: #E8DCC4;     /* champagne — highlight surfaces */
+  --color-brass: #D4A574;         /* warm brass accent */
+  --color-mist: #F4EFE7;          /* soft mist surface */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-display: 'Cormorant Garamond', 'Playfair Display', ui-serif, Georgia, serif;
+  --font-sans: 'Karla', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.75rem;              /* softer corners across components */
+  --background: #FBF8F3;
+  --foreground: #0F0F12;
+  --card: #FFFFFF;
+  --card-foreground: #0F0F12;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F0F12;
+  --primary: #0F0F12;
+  --primary-foreground: #FBF8F3;
+  --secondary: #F4EFE7;
+  --secondary-foreground: #0F0F12;
+  --muted: #F4EFE7;
+  --muted-foreground: #6B6B6B;
+  --accent: #D4A574;
+  --accent-foreground: #0F0F12;
+  --destructive: #B23A3A;
+  --destructive-foreground: #FBF8F3;
+  --border: rgba(15,15,18,0.08);
+  --input: rgba(15,15,18,0.12);
+  --ring: #D4A574;
+
+  /* Reusable elevation + gradient tokens */
+  --shadow-soft: 0 1px 2px rgba(15,15,18,0.04), 0 8px 24px -12px rgba(15,15,18,0.10);
+  --shadow-lifted: 0 4px 12px rgba(15,15,18,0.06), 0 24px 48px -20px rgba(15,15,18,0.18);
+  --gradient-noir: radial-gradient(120% 80% at 20% 0%, #1E1E24 0%, #0F0F12 60%, #08080A 100%);
+  --gradient-mist: linear-gradient(180deg, #FBF8F3 0%, #F4EFE7 100%);
+  --gradient-champagne: linear-gradient(135deg, #E8DCC4 0%, #D4A574 100%);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; font-size: 17px; }
+  @media (min-width: 768px) { html { font-size: 17.5px; } }
+  @media (min-width: 1024px) { html { font-size: 18px; } }
+  ::selection { background: rgba(212,165,116,0.30); }
+  /* Editorial display defaults */
+  h1, h2, h3, .font-display { letter-spacing: -0.01em; }
+  @media (max-width: 640px) {
+    input, select, textarea { font-size: 16px !important; }
+  }
+  img, video { max-width: 100%; height: auto; }
+}
+
+@layer utilities {
+  @keyframes boot-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes route-fade-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+  @keyframes boot-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .boot-fade { animation: boot-fade-in 180ms ease-out both; }
+  .route-fade { animation: route-fade-in 160ms ease-out both; }
+  .boot-skeleton {
+    background: linear-gradient(90deg, rgba(15,15,18,0.06) 0%, rgba(15,15,18,0.12) 50%, rgba(15,15,18,0.06) 100%);
+    background-size: 200% 100%;
+    animation: boot-shimmer 1.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .boot-fade, .route-fade, .boot-skeleton { animation: none; }
+  }
+}
+
+/* Readability scope — kept outside @layer so it overrides Tailwind utility
+   font-size classes (e.g. text-xs, text-[10px]) used across the dashboards.
+   Raises minimum sizes per accessibility/typography spec; every rule uses
+   max(1em, …) so already-larger text is never shrunk. */
+.dashboard-readable {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.dashboard-readable h1 {
+  font-size: clamp(1.875rem, 4.5vw, 2.75rem);
+  line-height: 1.1;
+}
+.dashboard-readable h2 {
+  font-size: clamp(1.375rem, 2.6vw, 1.75rem);
+  line-height: 1.2;
+  font-weight: 600;
+}
+.dashboard-readable h3 {
+  font-size: clamp(1.125rem, 2.2vw, 1.375rem);
+  line-height: 1.3;
+}
+.dashboard-readable p,
+.dashboard-readable li,
+.dashboard-readable label,
+.dashboard-readable a,
+.dashboard-readable span,
+.dashboard-readable summary,
+.dashboard-readable th,
+.dashboard-readable td {
+  font-size: max(1em, 0.9375rem);
+}
+.dashboard-readable input,
+.dashboard-readable textarea,
+.dashboard-readable select {
+  font-size: max(1em, 1rem);
+  line-height: 1.5;
+}
+.dashboard-readable button,
+.dashboard-readable [role="button"] {
+  font-size: max(1em, 1rem);
+}
+/* Mobile tap-target floor — 44px high. Desktop stays compact. */
+@media (max-width: 767px) {
+  .dashboard-readable button,
+  .dashboard-readable a[class*="rounded"],
+  .dashboard-readable a[class*="px-"] {
+    min-height: 44px;
+  }
+}
+/* Allow long titles to wrap rather than clip on small screens. */
+@media (max-width: 480px) {
+  .dashboard-readable h1,
+  .dashboard-readable h2,
+  .dashboard-readable h3 {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+}
+
+/* ===== Global form readability =====
+   Applies platform-wide to every <form> — Post a Job, Auth, Profile, Help,
+   Messaging, Search filters, etc. Floors typography and tap targets without
+   altering layout or functionality. shadcn primitives (Input/Select/Textarea)
+   already set their own sizes; these rules raise legacy/native form elements
+   that bypass those primitives. */
+form label {
+  font-size: max(1em, 0.9375rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+}
+@media (min-width: 768px) {
+  form label { font-size: max(1em, 1rem); }
+}
+form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]):not([type="range"]),
+form select,
+form textarea {
+  font-size: max(1em, 1rem);
+  line-height: 1.5;
+  min-height: 44px;
+}
+@media (min-width: 768px) {
+  form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]):not([type="range"]),
+  form select {
+    font-size: max(1em, 1.0625rem);
+  }
+}
+form textarea { min-height: 96px; }
+form input::placeholder,
+form textarea::placeholder {
+  font-size: inherit;
+  opacity: 0.7;
+}
+form input[type="checkbox"],
+form input[type="radio"] {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+form button,
+form [type="submit"],
+form [type="button"] {
+  min-height: 44px;
+  font-size: max(1em, 1rem);
+}
+@media (min-width: 768px) {
+  form button,
+  form [type="submit"],
+  form [type="button"] {
+    font-size: max(1em, 1.0625rem);
+  }
+}
+/* Step indicators (progress bars used in multi-step forms) */
+form [role="progressbar"],
+form .progress,
+form progress {
+  min-height: 6px;
+}
+
+/* ===== Pro dashboard hero card — mobile tightening (≤767px only) =====
+   The .dashboard-readable scope raises every label/button on mobile, which
+   makes the Pro hero card feel cramped. These overrides apply ONLY below the
+   md breakpoint and leave tablet/desktop untouched. */
+@media (max-width: 767px) {
+  .dashboard-readable .pro-hero-card .pro-hero-label {
+    font-size: 12px !important;
+    letter-spacing: 0.18em;
+    margin-bottom: 6px;
+  }
+  .dashboard-readable .pro-hero-card .pro-hero-title {
+    font-size: clamp(24px, 7vw, 28px) !important;
+    line-height: 1.15;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .dashboard-readable .pro-hero-card .pro-hero-subtitle {
+    font-size: 15px !important;
+    line-height: 1.4;
+    margin-top: 6px;
+  }
+  .dashboard-readable .pro-hero-card .pro-hero-actions {
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .dashboard-readable .pro-hero-card .pro-hero-actions a,
+  .dashboard-readable .pro-hero-card .pro-hero-actions button {
+    font-size: 14px !important;
+    letter-spacing: 0.06em;
+    padding: 8px 14px;
+    min-height: 44px;
+  }
+  .dashboard-readable .pro-hero-card .pro-hero-actions span {
+    font-size: 14px !important;
+  }
+}
+
+
+
+/* ===== Utilities: gradients, glass, organic shapes, motion ===== */
+
+
+@utility surface-noir {
+  background: var(--gradient-noir);
+  color: var(--color-paper);
+}
+@utility surface-mist {
+  background: var(--gradient-mist);
+}
+@utility surface-champagne {
+  background: var(--gradient-champagne);
+  color: var(--color-ink);
+}
+@utility card-soft {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease;
+}
+@utility card-soft-hover {
+  &:hover {
+    box-shadow: var(--shadow-lifted);
+    transform: translateY(-2px);
+    border-color: rgba(212,165,116,0.45);
+  }
+}
+@utility glass {
+  background: color-mix(in oklab, white 60%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.45);
+}
+@utility glass-dark {
+  background: color-mix(in oklab, #1E1E24 55%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(232,220,196,0.10);
+}
+@utility text-gradient-champagne {
+  background: var(--gradient-champagne);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Organic floating blob — for hero / dashboard banners */
+@utility blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-reveal { animation: reveal 0.8s cubic-bezier(0.19, 1, 0.22, 1) both; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(20px, -30px, 0) scale(1.05); }
+}
+.animate-float-slow { animation: float-slow 14s ease-in-out infinite; }
+
+@keyframes float-slower {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-30px, 20px, 0) scale(1.08); }
+}
+.animate-float-slower { animation: float-slower 22s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(232,220,196,0.35), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s linear infinite;
+}

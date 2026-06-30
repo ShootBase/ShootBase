@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "jobs matched pros read" ON public.jobs;

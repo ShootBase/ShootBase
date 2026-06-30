@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /pro/dashboard
+Disallow: /pro/onboarding
+Disallow: /threads/
+Disallow: /onboarding
+Disallow: /reset-password
