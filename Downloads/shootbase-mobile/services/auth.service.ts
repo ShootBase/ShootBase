@@ -1,5 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js';
 
+import { signInWithGoogleOAuth } from '@/lib/oauth';
 import { supabase } from '@/lib/supabase';
 import type { MobileRole } from '@/types/auth';
 import { getAuthErrorMessage } from '@/utils/auth-errors';
@@ -87,4 +88,10 @@ export async function signOutUser(): Promise<{ error: string | null }> {
   }
 
   return { error: null };
+}
+
+export async function signInWithGoogle(
+  role?: MobileRole,
+): Promise<{ error: string | null; cancelled: boolean }> {
+  return signInWithGoogleOAuth(role);
 }

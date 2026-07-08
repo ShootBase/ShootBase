@@ -16,6 +16,9 @@ export type AuthContextValue = {
   isLoading: boolean;
   isInitialized: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: (
+    role?: MobileRole,
+  ) => Promise<{ error: string | null; cancelled: boolean }>;
   signUp: (
     email: string,
     password: string,

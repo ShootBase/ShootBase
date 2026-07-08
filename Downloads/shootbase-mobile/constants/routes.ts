@@ -5,6 +5,7 @@ export const Routes = {
     onboarding: '/onboarding',
     login: '/login',
     register: '/register',
+    callback: '/callback',
   },
   client: {
     dashboard: '/(client)/(tabs)',

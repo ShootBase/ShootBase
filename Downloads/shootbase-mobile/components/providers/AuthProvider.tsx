@@ -7,11 +7,14 @@ import {
   type ReactNode,
 } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
+import * as Linking from 'expo-linking';
 
+import { consumePendingOAuthRole, createSessionFromUrl } from '@/lib/oauth';
 import { supabase } from '@/lib/supabase';
 import {
   getCurrentSession,
   signInWithEmail,
+  signInWithGoogle,
   signOutUser,
   signUpWithEmail,
 } from '@/services/auth.service';
@@ -25,6 +28,7 @@ import type { AppRole, Profile } from '@/types/database';
 import { getAuthErrorMessage } from '@/utils/auth-errors';
 import {
   accountTypeToMobileRole,
+  mobileRoleToAccountType,
   normalizeMetadataAccountType,
 } from '@/utils/roles';
 
@@ -74,6 +78,46 @@ async function resolveProfile(
   return { profile, profileError: null };
 }
 
+async function applyPendingOAuthRole(user: User): Promise<void> {
+  const pendingRole = await consumePendingOAuthRole();
+
+  if (!pendingRole) {
+    return;
+  }
+
+  const accountType = mobileRoleToAccountType(pendingRole);
+  const { profile } = await fetchProfile(user.id);
+
+  if (profile?.account_type) {
+    return;
+  }
+
+  await supabase.auth.updateUser({
+    data: {
+      account_type: accountType,
+      full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+    },
+  });
+
+  await updateProfileAccountType(user.id, accountType);
+}
+
+function OAuthDeepLinkHandler() {
+  const incomingUrl = Linking.useURL();
+
+  useEffect(() => {
+    if (!incomingUrl?.includes('callback')) {
+      return;
+    }
+
+    createSessionFromUrl(incomingUrl).catch((error) => {
+      console.error('OAuth deep link failed:', getAuthErrorMessage(error));
+    });
+  }, [incomingUrl]);
+
+  return null;
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -102,6 +146,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(nextSession.user);
 
     try {
+      await applyPendingOAuthRole(nextSession.user);
       const resolved = await resolveProfile(nextSession.user);
       setProfile(resolved.profile);
       setAccountType(resolved.profile?.account_type ?? null);
@@ -174,6 +219,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
+  const signInWithGoogleHandler = useCallback(async (role?: MobileRole) => {
+    setIsLoading(true);
+    try {
+      return await signInWithGoogle(role);
+    } catch (error) {
+      return { error: getAuthErrorMessage(error), cancelled: false };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const signUp = useCallback(
     async (email: string, password: string, fullName: string, nextRole: MobileRole) => {
       setIsLoading(true);
@@ -215,6 +271,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       isInitialized,
       signIn,
+      signInWithGoogle: signInWithGoogleHandler,
       signUp,
       signOut,
       refreshProfile,
@@ -229,11 +286,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       role,
       session,
       signIn,
+      signInWithGoogleHandler,
       signOut,
       signUp,
       user,
     ],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      <OAuthDeepLinkHandler />
+      {children}
+    </AuthContext.Provider>
+  );
 }

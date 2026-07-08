@@ -2,6 +2,8 @@ import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AuthDivider } from '@/components/auth/AuthDivider';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Screen } from '@/components/ui/Screen';
@@ -11,12 +13,13 @@ import { useTheme } from '@/hooks/use-theme';
 
 export default function LoginScreen() {
   const { theme } = useTheme();
-  const { signIn, isLoading } = useAuth();
+  const { signIn, signInWithGoogle, isLoading } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   async function handleSignIn() {
     setError(null);
@@ -36,8 +39,36 @@ export default function LoginScreen() {
     router.replace(Routes.root);
   }
 
+  async function handleGoogleSignIn() {
+    setError(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const result = await signInWithGoogle();
+
+      if (result.cancelled) {
+        return;
+      }
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      router.replace(Routes.root);
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  }
+
+  const authLoading = isLoading || isGoogleLoading;
+
   return (
     <Screen title="Sign In" subtitle="Access your ShootBase account">
+      <GoogleSignInButton onPress={handleGoogleSignIn} loading={isGoogleLoading} disabled={isLoading} />
+
+      <AuthDivider />
+
       <View style={styles.form}>
         <Input
           label="Email"
@@ -65,9 +96,9 @@ export default function LoginScreen() {
       ) : null}
 
       <View style={styles.actions}>
-        <Button title="Sign In" onPress={handleSignIn} loading={isLoading} fullWidth />
+        <Button title="Sign In" onPress={handleSignIn} loading={isLoading} disabled={isGoogleLoading} fullWidth />
         <Link href={Routes.auth.register} asChild>
-          <Button title="Create Account" variant="ghost" fullWidth />
+          <Button title="Create Account" variant="ghost" disabled={authLoading} fullWidth />
         </Link>
       </View>
     </Screen>

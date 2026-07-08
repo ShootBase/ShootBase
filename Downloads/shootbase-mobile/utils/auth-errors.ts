@@ -46,6 +46,14 @@ function mapMessage(message: string): string {
     return 'Please confirm your email before signing in.';
   }
 
+  if (normalized.includes('access_denied') || normalized.includes('user cancelled')) {
+    return 'Google sign-in was cancelled.';
+  }
+
+  if (normalized.includes('oauth') || normalized.includes('provider')) {
+    return 'Google sign-in failed. Please try again.';
+  }
+
   if (normalized.includes('network') || normalized.includes('fetch')) {
     return 'Network error. Check your connection and try again.';
   }

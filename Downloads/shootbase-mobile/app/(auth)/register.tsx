@@ -2,6 +2,8 @@ import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AuthDivider } from '@/components/auth/AuthDivider';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Screen } from '@/components/ui/Screen';
@@ -12,7 +14,7 @@ import type { MobileRole } from '@/types/auth';
 
 export default function RegisterScreen() {
   const { theme } = useTheme();
-  const { signUp, isLoading } = useAuth();
+  const { signUp, signInWithGoogle, isLoading } = useAuth();
   const router = useRouter();
 
   const [fullName, setFullName] = useState('');
@@ -21,6 +23,7 @@ export default function RegisterScreen() {
   const [accountType, setAccountType] = useState<MobileRole>('client');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   async function handleRegister() {
     setError(null);
@@ -51,8 +54,61 @@ export default function RegisterScreen() {
     router.replace(Routes.root);
   }
 
+  async function handleGoogleSignUp() {
+    setError(null);
+    setSuccessMessage(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const result = await signInWithGoogle(accountType);
+
+      if (result.cancelled) {
+        return;
+      }
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      router.replace(Routes.root);
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  }
+
+  const authLoading = isLoading || isGoogleLoading;
+
   return (
     <Screen title="Create Account" subtitle="Join the ShootBase community">
+      <View style={styles.roleSection}>
+        <Text style={[theme.typography.bodySmall, styles.roleLabel, { color: theme.colors.text }]}>
+          I am a
+        </Text>
+        <View style={styles.roleOptions}>
+          <RoleOption
+            label="Client"
+            selected={accountType === 'client'}
+            onPress={() => setAccountType('client')}
+            disabled={authLoading}
+          />
+          <RoleOption
+            label="Professional"
+            selected={accountType === 'pro'}
+            onPress={() => setAccountType('pro')}
+            disabled={authLoading}
+          />
+        </View>
+      </View>
+
+      <GoogleSignInButton
+        onPress={handleGoogleSignUp}
+        loading={isGoogleLoading}
+        disabled={isLoading}
+      />
+
+      <AuthDivider />
+
       <View style={styles.form}>
         <Input
           label="Full Name"
@@ -81,24 +137,6 @@ export default function RegisterScreen() {
         />
       </View>
 
-      <View style={styles.roleSection}>
-        <Text style={[theme.typography.bodySmall, styles.roleLabel, { color: theme.colors.text }]}>
-          I am a
-        </Text>
-        <View style={styles.roleOptions}>
-          <RoleOption
-            label="Client"
-            selected={accountType === 'client'}
-            onPress={() => setAccountType('client')}
-          />
-          <RoleOption
-            label="Professional"
-            selected={accountType === 'pro'}
-            onPress={() => setAccountType('pro')}
-          />
-        </View>
-      </View>
-
       {error ? (
         <Text style={[theme.typography.bodySmall, styles.message, { color: theme.colors.error }]}>
           {error}
@@ -114,9 +152,15 @@ export default function RegisterScreen() {
       ) : null}
 
       <View style={styles.actions}>
-        <Button title="Create Account" onPress={handleRegister} loading={isLoading} fullWidth />
+        <Button
+          title="Create Account"
+          onPress={handleRegister}
+          loading={isLoading}
+          disabled={isGoogleLoading}
+          fullWidth
+        />
         <Link href={Routes.auth.login} asChild>
-          <Button title="Already have an account?" variant="ghost" fullWidth />
+          <Button title="Already have an account?" variant="ghost" disabled={authLoading} fullWidth />
         </Link>
       </View>
     </Screen>
@@ -127,15 +171,17 @@ type RoleOptionProps = {
   label: string;
   selected: boolean;
   onPress: () => void;
+  disabled?: boolean;
 };
 
-function RoleOption({ label, selected, onPress }: RoleOptionProps) {
+function RoleOption({ label, selected, onPress, disabled }: RoleOptionProps) {
   const { theme } = useTheme();
 
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
+      disabled={disabled}
       style={[
         styles.roleOption,
         {
@@ -162,7 +208,7 @@ const styles = StyleSheet.create({
   },
   roleSection: {
     gap: 8,
-    marginTop: 4,
+    marginBottom: 4,
   },
   roleLabel: {
     fontWeight: '500',
